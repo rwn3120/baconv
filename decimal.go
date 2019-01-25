@@ -9,7 +9,7 @@
 // because 2 divides 10; cannot do decimal floating point
 // in multiprecision binary precisely.
 
-package bconv
+package baconv
 
 type decimal struct {
 	d     [800]byte // digits, big-endian representation

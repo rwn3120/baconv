@@ -4,7 +4,7 @@
 
 // export access to bconv internals for tests
 
-package bconv
+package baconv
 
 func NewDecimal(i uint64) *decimal {
 	d := new(decimal)

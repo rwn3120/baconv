@@ -54,4 +54,4 @@
 //
 // Unquote and UnquoteChar unquote Go string and rune literals.
 //
-package bconv
+package baconv

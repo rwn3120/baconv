@@ -4,7 +4,7 @@
 
 //go:generate go run makeisprint.go -output isprint.go
 
-package bconv
+package baconv
 
 import (
 	"unicode/utf8"

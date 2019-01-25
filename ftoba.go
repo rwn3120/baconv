@@ -8,7 +8,7 @@
 //   2) shift decimal by exponent
 //   3) read digits out & format
 
-package bconv
+package baconv
 
 import "math"
 
