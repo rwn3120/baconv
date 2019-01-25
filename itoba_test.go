@@ -58,7 +58,7 @@ var itob64tests = []itob64Test{
 	{(((((17*36+24)*36+21)*36+34)*36+12)*36+24)*36 + 32, 36, "holycow"},
 }
 
-func TestItoa(t *testing.T) {
+func TestItoba(t *testing.T) {
 	for _, test := range itob64tests {
 		s := FormatInt(test.in, test.base)
 		if s != test.out {
@@ -85,9 +85,9 @@ func TestItoa(t *testing.T) {
 		}
 
 		if test.base == 10 && int64(int(test.in)) == test.in {
-			s := Itoa(int(test.in))
+			s := Itoba(int(test.in))
 			if s != test.out {
-				t.Errorf("Itoa(%v) = %v want %v",
+				t.Errorf("Itoba(%v) = %v want %v",
 					test.in, s, test.out)
 			}
 		}
@@ -201,7 +201,7 @@ func BenchmarkAppendUint(b *testing.B) {
 func BenchmarkFormatIntSmall(b *testing.B) {
 	smallInts := []int64{7, 42}
 	for _, smallInt := range smallInts {
-		b.Run(Itoa(int(smallInt)), func(b *testing.B) {
+		b.Run(Itoba(int(smallInt)), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				s := FormatInt(smallInt, 10)
 				BenchSink += len(s)

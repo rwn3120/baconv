@@ -96,9 +96,9 @@ func ExampleAppendUint() {
 	// uint (base 16):2a
 }
 
-func ExampleAtoi() {
+func ExampleBatoi() {
 	v := "10"
-	if s, err := Atoi([]byte(v)); err == nil {
+	if s, err := Batoi([]byte(v)); err == nil {
 		fmt.Printf("%T, %v", s, s)
 	}
 
@@ -194,9 +194,9 @@ func ExampleIsPrint() {
 	// false
 }
 
-func ExampleItoa() {
+func ExampleItoba() {
 	i := 10
-	s := Itoa(i)
+	s := Itoba(i)
 	fmt.Printf("%T, %v\n", s, s)
 
 	// Output:

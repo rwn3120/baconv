@@ -32,11 +32,11 @@ func rangeError(fn, str string) *NumError {
 }
 
 func baseError(fn, str string, base int) *NumError {
-	return &NumError{fn, str, errors.New("invalid base " + Itoa(base))}
+	return &NumError{fn, str, errors.New("invalid base " + Itoba(base))}
 }
 
 func bitSizeError(fn, str string, bitSize int) *NumError {
-	return &NumError{fn, str, errors.New("invalid bit size " + Itoa(bitSize))}
+	return &NumError{fn, str, errors.New("invalid bit size " + Itoba(bitSize))}
 }
 
 const intSize = 32 << (^uint(0) >> 63)
@@ -198,9 +198,9 @@ func ParseInt(ba []byte, base int, bitSize int) (i int64, err error) {
 	return n, nil
 }
 
-// Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
-func Atoi(ba []byte) (int, error) {
-	const fnAtoi = "Atoi"
+// Batoi is equivalent to ParseInt(s, 10, 0), converted to type int.
+func Batoi(ba []byte) (int, error) {
+	const fnBatoi = "Batoi"
 
 	sLen := len(ba)
 	if intSize == 32 && (0 < sLen && sLen < 10) ||
@@ -210,7 +210,7 @@ func Atoi(ba []byte) (int, error) {
 		if ba[0] == '-' || ba[0] == '+' {
 			ba = ba[1:]
 			if len(ba) < 1 {
-				return 0, &NumError{fnAtoi, string(ba0), ErrSyntax}
+				return 0, &NumError{fnBatoi, string(ba0), ErrSyntax}
 			}
 		}
 
@@ -218,7 +218,7 @@ func Atoi(ba []byte) (int, error) {
 		for _, ch := range []byte(ba) {
 			ch -= '0'
 			if ch > 9 {
-				return 0, &NumError{fnAtoi, string(ba0), ErrSyntax}
+				return 0, &NumError{fnBatoi, string(ba0), ErrSyntax}
 			}
 			n = n*10 + int(ch)
 		}
@@ -231,7 +231,7 @@ func Atoi(ba []byte) (int, error) {
 	// Slow path for invalid or big integers.
 	i64, err := ParseInt(ba, 10, 0)
 	if nerr, ok := err.(*NumError); ok {
-		nerr.Func = fnAtoi
+		nerr.Func = fnBatoi
 	}
 	return int(i64), err
 }

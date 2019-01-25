@@ -129,7 +129,7 @@ var ftoatests = []ftoaTest{
 	{383260575764816448, 'g', -1, "3.8326057576481645e+17"},
 }
 
-func TestFtoa(t *testing.T) {
+func TestFtoba(t *testing.T) {
 	for i := 0; i < len(ftoatests); i++ {
 		test := &ftoatests[i]
 		s := string(FormatFloat(test.f, test.fmt, test.prec, 64))
@@ -153,7 +153,7 @@ func TestFtoa(t *testing.T) {
 	}
 }
 
-func TestFtoaRandom(t *testing.T) {
+func TestFtobaRandom(t *testing.T) {
 	N := int(1e4)
 	if testing.Short() {
 		N = 100

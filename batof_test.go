@@ -14,13 +14,13 @@ import (
 	"time"
 )
 
-type atofTest struct {
+type batofTest struct {
 	in  string
 	out string
 	err error
 }
 
-var atoftests = []atofTest{
+var batoftests = []batofTest{
 	{"", "0", ErrSyntax},
 	{"1", "1", nil},
 	{"+1", "1", nil},
@@ -159,7 +159,7 @@ var atoftests = []atofTest{
 	{"1.00000000000000011102230246251565404236316680908203125" + strings.Repeat("0", 10000) + "1", "1.0000000000000002", nil},
 }
 
-var atof32tests = []atofTest{
+var batof32tests = []batofTest{
 	// Exactly halfway between 1 and the next float32.
 	// Round to even (down).
 	{"1.000000059604644775390625", "1", nil},
@@ -207,33 +207,33 @@ var atof32tests = []atofTest{
 	{"4951760157141521099596496896", "4.9517602e+27", nil},
 }
 
-type atofSimpleTest struct {
+type batofSimpleTest struct {
 	x float64
 	s string
 }
 
 var (
-	atofOnce               sync.Once
-	atofRandomTests        []atofSimpleTest
+	batofOnce               sync.Once
+	batofRandomTests        []batofSimpleTest
 	benchmarksRandomBits   [1024]string
 	benchmarksRandomNormal [1024]string
 )
 
-func initAtof() {
-	atofOnce.Do(initAtofOnce)
+func initBatof() {
+	batofOnce.Do(initBatofOnce)
 }
 
-func initAtofOnce() {
-	// The atof routines return NumErrors wrapping
+func initBatofOnce() {
+	// The batof routines return NumErrors wrapping
 	// the error and the string. Convert the table above.
-	for i := range atoftests {
-		test := &atoftests[i]
+	for i := range batoftests {
+		test := &batoftests[i]
 		if test.err != nil {
 			test.err = &NumError{"ParseFloat", test.in, test.err}
 		}
 	}
-	for i := range atof32tests {
-		test := &atof32tests[i]
+	for i := range batof32tests {
+		test := &batof32tests[i]
 		if test.err != nil {
 			test.err = &NumError{"ParseFloat", test.in, test.err}
 		}
@@ -242,15 +242,15 @@ func initAtofOnce() {
 	// Generate random inputs for tests and benchmarks
 	rand.Seed(time.Now().UnixNano())
 	if testing.Short() {
-		atofRandomTests = make([]atofSimpleTest, 100)
+		batofRandomTests = make([]batofSimpleTest, 100)
 	} else {
-		atofRandomTests = make([]atofSimpleTest, 10000)
+		batofRandomTests = make([]batofSimpleTest, 10000)
 	}
-	for i := range atofRandomTests {
+	for i := range batofRandomTests {
 		n := uint64(rand.Uint32())<<32 | uint64(rand.Uint32())
 		x := math.Float64frombits(n)
 		s := string(FormatFloat(x, 'g', -1, 64))
-		atofRandomTests[i] = atofSimpleTest{x, s}
+		batofRandomTests[i] = batofSimpleTest{x, s}
 	}
 
 	for i := range benchmarksRandomBits {
@@ -265,11 +265,11 @@ func initAtofOnce() {
 	}
 }
 
-func testAtof(t *testing.T, opt bool) {
-	initAtof()
+func testBatof(t *testing.T, opt bool) {
+	initBatof()
 	oldopt := SetOptimize(opt)
-	for i := 0; i < len(atoftests); i++ {
-		test := &atoftests[i]
+	for i := 0; i < len(batoftests); i++ {
+		test := &batoftests[i]
 		out, err := ParseFloat([]byte(test.in), 64)
 		outs := string(FormatFloat(out, 'g', -1, 64))
 		if outs != test.out || !reflect.DeepEqual(err, test.err) {
@@ -291,7 +291,7 @@ func testAtof(t *testing.T, opt bool) {
 			}
 		}
 	}
-	for _, test := range atof32tests {
+	for _, test := range batof32tests {
 		out, err := ParseFloat([]byte(test.in), 32)
 		out32 := float32(out)
 		if float64(out32) != out {
@@ -307,13 +307,13 @@ func testAtof(t *testing.T, opt bool) {
 	SetOptimize(oldopt)
 }
 
-func TestAtof(t *testing.T) { testAtof(t, true) }
+func TestBatof(t *testing.T) { testBatof(t, true) }
 
-func TestAtofSlow(t *testing.T) { testAtof(t, false) }
+func TestBatofSlow(t *testing.T) { testBatof(t, false) }
 
-func TestAtofRandom(t *testing.T) {
-	initAtof()
-	for _, test := range atofRandomTests {
+func TestBatofRandom(t *testing.T) {
+	initBatof()
+	for _, test := range batofRandomTests {
 		x, _ := ParseFloat([]byte(test.s), 64)
 		switch {
 		default:
@@ -322,7 +322,7 @@ func TestAtofRandom(t *testing.T) {
 		case math.IsNaN(test.x) && math.IsNaN(x):
 		}
 	}
-	t.Logf("tested %d random numbers", len(atofRandomTests))
+	t.Logf("tested %d random numbers", len(batofRandomTests))
 }
 
 var roundTripCases = []struct {
@@ -392,55 +392,55 @@ func TestRoundTrip32(t *testing.T) {
 	t.Logf("tested %d float32's", count)
 }
 
-func BenchmarkAtof64Decimal(b *testing.B) {
+func BenchmarkBatof64Decimal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("33909"), 64)
 	}
 }
 
-func BenchmarkAtof64Float(b *testing.B) {
+func BenchmarkBatof64Float(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("339.7784"), 64)
 	}
 }
 
-func BenchmarkAtof64FloatExp(b *testing.B) {
+func BenchmarkBatof64FloatExp(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("-5.09e75"), 64)
 	}
 }
 
-func BenchmarkAtof64Big(b *testing.B) {
+func BenchmarkBatof64Big(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("123456789123456789123456789"), 64)
 	}
 }
 
-func BenchmarkAtof64RandomBits(b *testing.B) {
+func BenchmarkBatof64RandomBits(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte(benchmarksRandomBits[i%1024]), 64)
 	}
 }
 
-func BenchmarkAtof64RandomFloats(b *testing.B) {
+func BenchmarkBatof64RandomFloats(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte(benchmarksRandomNormal[i%1024]), 64)
 	}
 }
 
-func BenchmarkAtof32Decimal(b *testing.B) {
+func BenchmarkBatof32Decimal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("33909"), 32)
 	}
 }
 
-func BenchmarkAtof32Float(b *testing.B) {
+func BenchmarkBatof32Float(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("339.778"), 32)
 	}
 }
 
-func BenchmarkAtof32FloatExp(b *testing.B) {
+func BenchmarkBatof32FloatExp(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseFloat([]byte("12.3456e32"), 32)
 	}
@@ -448,7 +448,7 @@ func BenchmarkAtof32FloatExp(b *testing.B) {
 
 var float32strings [4096]string
 
-func BenchmarkAtof32Random(b *testing.B) {
+func BenchmarkBatof32Random(b *testing.B) {
 	n := uint32(997)
 	for i := range float32strings {
 		n = (99991*n + 42) % (0xff << 23)

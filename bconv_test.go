@@ -56,7 +56,7 @@ func TestCountMallocs(t *testing.T) {
 }
 
 func TestErrorPrefixes(t *testing.T) {
-	_, errInt := Atoi([]byte("INVALID"))
+	_, errInt := Batoi([]byte("INVALID"))
 	_, errBool := ParseBool([]byte("INVALID"))
 	_, errFloat := ParseFloat([]byte("INVALID"), 64)
 	_, errInt64 := ParseInt([]byte("INVALID"), 10, 64)
@@ -66,7 +66,7 @@ func TestErrorPrefixes(t *testing.T) {
 		err  error  // Input error
 		want string // Function name wanted
 	}{
-		{errInt, "Atoi"},
+		{errInt, "Batoi"},
 		{errBool, "ParseBool"},
 		{errFloat, "ParseFloat"},
 		{errInt64, "ParseInt"},

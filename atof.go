@@ -344,7 +344,7 @@ var float32pow10 = []float32{1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1
 //	value is exact integer * exact power of ten
 //	value is exact integer / exact power of ten
 // These all produce potentially inexact but correctly rounded answers.
-func atof64exact(mantissa uint64, exp int, neg bool) (f float64, ok bool) {
+func batof64exact(mantissa uint64, exp int, neg bool) (f float64, ok bool) {
 	if mantissa>>float64info.mantbits != 0 {
 		return
 	}
@@ -378,7 +378,7 @@ func atof64exact(mantissa uint64, exp int, neg bool) (f float64, ok bool) {
 
 // If possible to compute mantissa*10^exp to 32-bit float f exactly,
 // entirely in floating-point math, do so, avoiding the machinery above.
-func atof32exact(mantissa uint64, exp int, neg bool) (f float32, ok bool) {
+func batof32exact(mantissa uint64, exp int, neg bool) (f float32, ok bool) {
 	if mantissa>>float32info.mantbits != 0 {
 		return
 	}
@@ -448,7 +448,7 @@ func special(ba []byte) (f float64, ok bool) {
 	return
 }
 
-func atof32(ba []byte) (f float32, err error) {
+func batof32(ba []byte) (f float32, err error) {
 	if val, ok := special(ba); ok {
 		return float32(val), nil
 	}
@@ -459,7 +459,7 @@ func atof32(ba []byte) (f float32, err error) {
 		if ok {
 			// Try pure floating-point arithmetic conversion.
 			if !trunc {
-				if f, ok := atof32exact(mantissa, exp, neg); ok {
+				if f, ok := batof32exact(mantissa, exp, neg); ok {
 					return f, nil
 				}
 			}
@@ -487,7 +487,7 @@ func atof32(ba []byte) (f float32, err error) {
 	return f, err
 }
 
-func atof64(ba []byte) (f float64, err error) {
+func batof64(ba []byte) (f float64, err error) {
 	if val, ok := special(ba); ok {
 		return val, nil
 	}
@@ -498,7 +498,7 @@ func atof64(ba []byte) (f float64, err error) {
 		if ok {
 			// Try pure floating-point arithmetic conversion.
 			if !trunc {
-				if f, ok := atof64exact(mantissa, exp, neg); ok {
+				if f, ok := batof64exact(mantissa, exp, neg); ok {
 					return f, nil
 				}
 			}
@@ -545,8 +545,8 @@ func atof64(ba []byte) (f float64, err error) {
 // ParseFloat returns f = ±Inf, err.Err = ErrRange.
 func ParseFloat(ba []byte, bitSize int) (float64, error) {
 	if bitSize == 32 {
-		f, err := atof32(ba)
+		f, err := batof32(ba)
 		return float64(f), err
 	}
-	return atof64(ba)
+	return batof64(ba)
 }

@@ -354,31 +354,31 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
-func TestAtoi(t *testing.T) {
+func TestBatoi(t *testing.T) {
 	switch IntSize {
 	case 32:
 		for i := range parseInt32Tests {
 			test := &parseInt32Tests[i]
-			out, err := Atoi([]byte(test.in))
+			out, err := Batoi([]byte(test.in))
 			var testErr error
 			if test.err != nil {
-				testErr = &NumError{"Atoi", test.in, test.err.(*NumError).Err}
+				testErr = &NumError{"Batoi", test.in, test.err.(*NumError).Err}
 			}
 			if int(test.out) != out || !reflect.DeepEqual(testErr, err) {
-				t.Errorf("Atoi(%q) = %v, %v want %v, %v",
+				t.Errorf("Batoi(%q) = %v, %v want %v, %v",
 					test.in, out, err, test.out, testErr)
 			}
 		}
 	case 64:
 		for i := range parseInt64Tests {
 			test := &parseInt64Tests[i]
-			out, err := Atoi([]byte(test.in))
+			out, err := Batoi([]byte(test.in))
 			var testErr error
 			if test.err != nil {
-				testErr = &NumError{"Atoi", test.in, test.err.(*NumError).Err}
+				testErr = &NumError{"Batoi", test.in, test.err.(*NumError).Err}
 			}
 			if test.out != int64(out) || !reflect.DeepEqual(testErr, err) {
-				t.Errorf("Atoi(%q) = %v, %v want %v, %v",
+				t.Errorf("Batoi(%q) = %v, %v want %v, %v",
 					test.in, out, err, test.out, testErr)
 			}
 		}
@@ -512,16 +512,16 @@ func benchmarkParseInt(b *testing.B, neg int) {
 	}
 }
 
-func BenchmarkAtoi(b *testing.B) {
+func BenchmarkBatoi(b *testing.B) {
 	b.Run("Pos", func(b *testing.B) {
-		benchmarkAtoi(b, 1)
+		benchmarkBatoi(b, 1)
 	})
 	b.Run("Neg", func(b *testing.B) {
-		benchmarkAtoi(b, -1)
+		benchmarkBatoi(b, -1)
 	})
 }
 
-func benchmarkAtoi(b *testing.B, neg int) {
+func benchmarkBatoi(b *testing.B, neg int) {
 	cases := []benchCase{
 		{"7bit", 1<<7 - 1},
 		{"26bit", 1<<26 - 1},
@@ -537,7 +537,7 @@ func benchmarkAtoi(b *testing.B, neg int) {
 		b.Run(cs.name, func(b *testing.B) {
 			s := fmt.Sprintf("%d", cs.num*int64(neg))
 			for i := 0; i < b.N; i++ {
-				out, _ := Atoi([]byte(s))
+				out, _ := Batoi([]byte(s))
 				BenchSink += out
 			}
 		})

@@ -7,10 +7,10 @@
 //
 // Numeric Conversions
 //
-// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
+// The most common numeric conversions are Batoi (string to int) and Itoba (int to string).
 //
-//	i, err := bconv.Atoi("-42")
-//	s := bconv.Itoa(-42)
+//	i, err := bconv.Batoi("-42")
+//	s := bconv.Itoba(-42)
 //
 // These assume decimal and the Go int type.
 //

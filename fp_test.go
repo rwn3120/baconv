@@ -26,14 +26,14 @@ func pow2(i int) float64 {
 
 // Wrapper around ParseFloat(x, 64).  Handles dddddp+ddd (binary exponent)
 // itself, passes the rest on to ParseFloat.
-func myatof64(s string) (f float64, ok bool) {
+func mybatof64(s string) (f float64, ok bool) {
 	a := strings.SplitN(s, "p", 2)
 	if len(a) == 2 {
 		n, err := ParseInt([]byte(a[0]), 10, 64)
 		if err != nil {
 			return 0, false
 		}
-		e, err1 := Atoi([]byte(a[1]))
+		e, err1 := Batoi([]byte(a[1]))
 		if err1 != nil {
 			println("bad e", a[1])
 			return 0, false
@@ -70,15 +70,15 @@ func myatof64(s string) (f float64, ok bool) {
 
 // Wrapper around ParseFloat(x, 32).  Handles dddddp+ddd (binary exponent)
 // itself, passes the rest on to ParseFloat.
-func myatof32(s string) (f float32, ok bool) {
+func mybatof32(s string) (f float32, ok bool) {
 	a := strings.SplitN(s, "p", 2)
 	if len(a) == 2 {
-		n, err := Atoi([]byte(a[0]))
+		n, err := Batoi([]byte(a[0]))
 		if err != nil {
 			println("bad n", a[0])
 			return 0, false
 		}
-		e, err1 := Atoi([]byte(a[1]))
+		e, err1 := Batoi([]byte(a[1]))
 		if err1 != nil {
 			println("bad p", a[1])
 			return 0, false
@@ -117,16 +117,16 @@ func TestFp(t *testing.T) {
 		switch a[0] {
 		case "float64":
 			var ok bool
-			v, ok = myatof64(a[2])
+			v, ok = mybatof64(a[2])
 			if !ok {
-				t.Error("testdata/testfp.txt:", lineno, ": cannot atof64 ", a[2])
+				t.Error("testdata/testfp.txt:", lineno, ": cannot batof64 ", a[2])
 				continue
 			}
 			s = fmt.Sprintf(a[1], v)
 		case "float32":
-			v1, ok := myatof32(a[2])
+			v1, ok := mybatof32(a[2])
 			if !ok {
-				t.Error("testdata/testfp.txt:", lineno, ": cannot atof32 ", a[2])
+				t.Error("testdata/testfp.txt:", lineno, ": cannot batof32 ", a[2])
 				continue
 			}
 			s = fmt.Sprintf(a[1], v1)
