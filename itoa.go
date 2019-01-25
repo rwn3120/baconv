@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv
+package bconv
 
 import "math/bits"
 
@@ -88,7 +88,7 @@ const digits = "0123456789abcdefghijklmnopqrstuvwxyz"
 //
 func formatBits(dst []byte, u uint64, base int, neg, append_ bool) (d []byte, s string) {
 	if base < 2 || base > len(digits) {
-		panic("strconv: illegal AppendInt/FormatInt base")
+		panic("bconv: illegal AppendInt/FormatInt base")
 	}
 	// 2 <= base && base <= len(digits)
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv
+package bconv
 
 // decimal to binary floating point conversion.
 // Algorithm:
@@ -10,7 +10,10 @@ package strconv
 //   2) Multiply/divide decimal by powers of two until in range [0.5, 1)
 //   3) Multiply by 2^precision and round to get mantissa.
 
-import "math"
+import (
+	"bytes"
+	"math"
+)
 
 var optimize = true // can change for testing
 
@@ -34,74 +37,47 @@ func equalIgnoreCase(s1, s2 string) bool {
 	return true
 }
 
-func special(s string) (f float64, ok bool) {
-	if len(s) == 0 {
-		return
-	}
-	switch s[0] {
-	default:
-		return
-	case '+':
-		if equalIgnoreCase(s, "+inf") || equalIgnoreCase(s, "+infinity") {
-			return math.Inf(1), true
-		}
-	case '-':
-		if equalIgnoreCase(s, "-inf") || equalIgnoreCase(s, "-infinity") {
-			return math.Inf(-1), true
-		}
-	case 'n', 'N':
-		if equalIgnoreCase(s, "nan") {
-			return math.NaN(), true
-		}
-	case 'i', 'I':
-		if equalIgnoreCase(s, "inf") || equalIgnoreCase(s, "infinity") {
-			return math.Inf(1), true
-		}
-	}
-	return
-}
-
-func (b *decimal) set(s string) (ok bool) {
+func (d *decimal) set(ba []byte) (ok bool) {
 	i := 0
-	b.neg = false
-	b.trunc = false
+	d.neg = false
+	d.trunc = false
 
 	// optional sign
-	if i >= len(s) {
+	if i >= len(ba) {
 		return
 	}
 	switch {
-	case s[i] == '+':
+	case ba[i] == '+':
 		i++
-	case s[i] == '-':
-		b.neg = true
+	case ba[i] == '-':
+		d.neg = true
 		i++
 	}
 
 	// digits
 	sawdot := false
 	sawdigits := false
-	for ; i < len(s); i++ {
+	for ; i < len(ba); i++ {
 		switch {
-		case s[i] == '.':
+		case ba[i] == '.':
 			if sawdot {
 				return
 			}
 			sawdot = true
-			b.dp = b.nd
+			d.dp = d.nd
 			continue
 
-		case '0' <= s[i] && s[i] <= '9':
+		case '0' <= ba[i] && ba[i] <= '9':
 			sawdigits = true
-			if s[i] == '0' && b.nd == 0 { // ignore leading zeros
-				b.dp--
+			if ba[i] == '0' && d.nd == 0 { // ignore leading zeros
+				d.dp--
 				continue
 			}
-			if b.nd < len(b.d) {
-				b.d[b.nd] = s[i]
-				b.nd++
-			} else if s[i] != '0' {
-				b.trunc = true
+			if d.nd < len(d.d) {
+				d.d[d.nd] = ba[i]
+				d.nd++
+			} else if ba[i] != '0' {
+				d.trunc = true
 			}
 			continue
 		}
@@ -111,7 +87,7 @@ func (b *decimal) set(s string) (ok bool) {
 		return
 	}
 	if !sawdot {
-		b.dp = b.nd
+		d.dp = d.nd
 	}
 
 	// optional exponent moves decimal point.
@@ -119,31 +95,31 @@ func (b *decimal) set(s string) (ok bool) {
 	// just be sure to move the decimal point by
 	// a lot (say, 100000).  it doesn't matter if it's
 	// not the exact number.
-	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+	if i < len(ba) && (ba[i] == 'e' || ba[i] == 'E') {
 		i++
-		if i >= len(s) {
+		if i >= len(ba) {
 			return
 		}
 		esign := 1
-		if s[i] == '+' {
+		if ba[i] == '+' {
 			i++
-		} else if s[i] == '-' {
+		} else if ba[i] == '-' {
 			i++
 			esign = -1
 		}
-		if i >= len(s) || s[i] < '0' || s[i] > '9' {
+		if i >= len(ba) || ba[i] < '0' || ba[i] > '9' {
 			return
 		}
 		e := 0
-		for ; i < len(s) && '0' <= s[i] && s[i] <= '9'; i++ {
+		for ; i < len(ba) && '0' <= ba[i] && ba[i] <= '9'; i++ {
 			if e < 10000 {
-				e = e*10 + int(s[i]) - '0'
+				e = e*10 + int(ba[i]) - '0'
 			}
 		}
-		b.dp += e * esign
+		d.dp += e * esign
 	}
 
-	if i != len(s) {
+	if i != len(ba) {
 		return
 	}
 
@@ -154,18 +130,18 @@ func (b *decimal) set(s string) (ok bool) {
 // readFloat reads a decimal mantissa and exponent from a float
 // string representation. It sets ok to false if the number could
 // not fit return types or is invalid.
-func readFloat(s string) (mantissa uint64, exp int, neg, trunc, ok bool) {
+func readFloat(ba []byte) (mantissa uint64, exp int, neg, trunc, ok bool) {
 	const uint64digits = 19
 	i := 0
 
 	// optional sign
-	if i >= len(s) {
+	if i >= len(ba) {
 		return
 	}
 	switch {
-	case s[i] == '+':
+	case ba[i] == '+':
 		i++
-	case s[i] == '-':
+	case ba[i] == '-':
 		neg = true
 		i++
 	}
@@ -176,8 +152,8 @@ func readFloat(s string) (mantissa uint64, exp int, neg, trunc, ok bool) {
 	nd := 0
 	ndMant := 0
 	dp := 0
-	for ; i < len(s); i++ {
-		switch c := s[i]; true {
+	for ; i < len(ba); i++ {
+		switch c := ba[i]; true {
 		case c == '.':
 			if sawdot {
 				return
@@ -197,7 +173,7 @@ func readFloat(s string) (mantissa uint64, exp int, neg, trunc, ok bool) {
 				mantissa *= 10
 				mantissa += uint64(c - '0')
 				ndMant++
-			} else if s[i] != '0' {
+			} else if ba[i] != '0' {
 				trunc = true
 			}
 			continue
@@ -216,31 +192,31 @@ func readFloat(s string) (mantissa uint64, exp int, neg, trunc, ok bool) {
 	// just be sure to move the decimal point by
 	// a lot (say, 100000).  it doesn't matter if it's
 	// not the exact number.
-	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+	if i < len(ba) && (ba[i] == 'e' || ba[i] == 'E') {
 		i++
-		if i >= len(s) {
+		if i >= len(ba) {
 			return
 		}
 		esign := 1
-		if s[i] == '+' {
+		if ba[i] == '+' {
 			i++
-		} else if s[i] == '-' {
+		} else if ba[i] == '-' {
 			i++
 			esign = -1
 		}
-		if i >= len(s) || s[i] < '0' || s[i] > '9' {
+		if i >= len(ba) || ba[i] < '0' || ba[i] > '9' {
 			return
 		}
 		e := 0
-		for ; i < len(s) && '0' <= s[i] && s[i] <= '9'; i++ {
+		for ; i < len(ba) && '0' <= ba[i] && ba[i] <= '9'; i++ {
 			if e < 10000 {
-				e = e*10 + int(s[i]) - '0'
+				e = e*10 + int(ba[i]) - '0'
 			}
 		}
 		dp += e * esign
 	}
 
-	if i != len(s) {
+	if i != len(ba) {
 		return
 	}
 
@@ -435,14 +411,51 @@ func atof32exact(mantissa uint64, exp int, neg bool) (f float32, ok bool) {
 
 const fnParseFloat = "ParseFloat"
 
-func atof32(s string) (f float32, err error) {
-	if val, ok := special(s); ok {
+var infinity = [][]byte{
+	[]byte{'i', 'n', 'f'},
+	[]byte{'i', 'n', 'f', 'i', 'n', 'i', 't', 'y'},
+	[]byte{'+', 'i', 'n', 'f'},
+	[]byte{'+', 'i', 'n', 'f', 'i', 'n', 'i', 't', 'y'}}
+var negInfinity = [][]byte{
+	[]byte{'-', 'i', 'n', 'f'},
+	[]byte{'-', 'i', 'n', 'f', 'i', 'n', 'i', 't', 'y'}}
+var nan = []byte{'n', 'a', 'n'}
+
+func special(ba []byte) (f float64, ok bool) {
+	if len(ba) == 0 {
+		return
+	}
+	switch ba[0] {
+	default:
+		return
+	case '+', 'i', 'I':
+		for _, val := range infinity {
+			if bytes.EqualFold(ba, val) {
+				return math.Inf(1), true
+			}
+		}
+	case '-':
+		for _, val := range negInfinity {
+			if bytes.EqualFold(ba, val) {
+				return math.Inf(-1), true
+			}
+		}
+	case 'n', 'N':
+		if bytes.EqualFold(ba, nan) {
+			return math.NaN(), true
+		}
+	}
+	return
+}
+
+func atof32(ba []byte) (f float32, err error) {
+	if val, ok := special(ba); ok {
 		return float32(val), nil
 	}
 
 	if optimize {
 		// Parse mantissa and exponent.
-		mantissa, exp, neg, trunc, ok := readFloat(s)
+		mantissa, exp, neg, trunc, ok := readFloat(ba)
 		if ok {
 			// Try pure floating-point arithmetic conversion.
 			if !trunc {
@@ -453,35 +466,35 @@ func atof32(s string) (f float32, err error) {
 			// Try another fast path.
 			ext := new(extFloat)
 			if ok := ext.AssignDecimal(mantissa, exp, neg, trunc, &float32info); ok {
-				b, ovf := ext.floatBits(&float32info)
-				f = math.Float32frombits(uint32(b))
+				bits, ovf := ext.floatBits(&float32info)
+				f = math.Float32frombits(uint32(bits))
 				if ovf {
-					err = rangeError(fnParseFloat, s)
+					err = rangeError(fnParseFloat, string(ba))
 				}
 				return f, err
 			}
 		}
 	}
 	var d decimal
-	if !d.set(s) {
-		return 0, syntaxError(fnParseFloat, s)
+	if !d.set(ba) {
+		return 0, syntaxError(fnParseFloat, string(ba))
 	}
-	b, ovf := d.floatBits(&float32info)
-	f = math.Float32frombits(uint32(b))
+	bits, ovf := d.floatBits(&float32info)
+	f = math.Float32frombits(uint32(bits))
 	if ovf {
-		err = rangeError(fnParseFloat, s)
+		err = rangeError(fnParseFloat, string(ba))
 	}
 	return f, err
 }
 
-func atof64(s string) (f float64, err error) {
-	if val, ok := special(s); ok {
+func atof64(ba []byte) (f float64, err error) {
+	if val, ok := special(ba); ok {
 		return val, nil
 	}
 
 	if optimize {
 		// Parse mantissa and exponent.
-		mantissa, exp, neg, trunc, ok := readFloat(s)
+		mantissa, exp, neg, trunc, ok := readFloat(ba)
 		if ok {
 			// Try pure floating-point arithmetic conversion.
 			if !trunc {
@@ -492,23 +505,23 @@ func atof64(s string) (f float64, err error) {
 			// Try another fast path.
 			ext := new(extFloat)
 			if ok := ext.AssignDecimal(mantissa, exp, neg, trunc, &float64info); ok {
-				b, ovf := ext.floatBits(&float64info)
-				f = math.Float64frombits(b)
+				bits, ovf := ext.floatBits(&float64info)
+				f = math.Float64frombits(bits)
 				if ovf {
-					err = rangeError(fnParseFloat, s)
+					err = rangeError(fnParseFloat, string(ba))
 				}
 				return f, err
 			}
 		}
 	}
 	var d decimal
-	if !d.set(s) {
-		return 0, syntaxError(fnParseFloat, s)
+	if !d.set(ba) {
+		return 0, syntaxError(fnParseFloat, string(ba))
 	}
-	b, ovf := d.floatBits(&float64info)
-	f = math.Float64frombits(b)
+	bits, ovf := d.floatBits(&float64info)
+	f = math.Float64frombits(bits)
 	if ovf {
-		err = rangeError(fnParseFloat, s)
+		err = rangeError(fnParseFloat, string(ba))
 	}
 	return f, err
 }
@@ -530,10 +543,10 @@ func atof64(s string) (f float64, err error) {
 // If s is syntactically well-formed but is more than 1/2 ULP
 // away from the largest floating point number of the given size,
 // ParseFloat returns f = ±Inf, err.Err = ErrRange.
-func ParseFloat(s string, bitSize int) (float64, error) {
+func ParseFloat(ba []byte, bitSize int) (float64, error) {
 	if bitSize == 32 {
-		f, err := atof32(s)
+		f, err := atof32(ba)
 		return float64(f), err
 	}
-	return atof64(s)
+	return atof64(ba)
 }

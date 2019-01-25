@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"bytes"
-	. "strconv"
 	"testing"
 )
 
@@ -35,7 +34,7 @@ var atobtests = []atobTest{
 
 func TestParseBool(t *testing.T) {
 	for _, test := range atobtests {
-		b, e := ParseBool(test.in)
+		b, e := ParseBool([]byte(test.in))
 		if test.err != nil {
 			// expect an error
 			if e == nil {
@@ -62,10 +61,10 @@ var boolString = map[bool]string{
 	false: "false",
 }
 
-func TestFormatBool(t *testing.T) {
+func TeststringFormatBool(t *testing.T) {
 	for b, s := range boolString {
-		if f := FormatBool(b); f != s {
-			t.Errorf(`FormatBool(%v): expected %q but got %q`, b, s, f)
+		if f := string(FormatBool(b)); f != s {
+			t.Errorf(`string(FormatBool(%v): expected %q but got %q`, b, s, f)
 		}
 	}
 }

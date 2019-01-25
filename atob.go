@@ -2,27 +2,49 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv
+package bconv
+
+import "bytes"
+
+var trueValues = [][]byte{
+	[]byte{'1'},
+	[]byte{'t'},
+	[]byte{'T'},
+	[]byte{'t', 'r', 'u', 'e'},
+	[]byte{'T', 'r', 'u', 'e'},
+	[]byte{'T', 'R', 'U', 'E'}}
+
+var falseValues = [][]byte{
+	[]byte{'f', 'a', 'l', 's', 'e'},
+	[]byte{'0'},
+	[]byte{'f'},
+	[]byte{'F'},
+	[]byte{'F', 'a', 'l', 's', 'e'},
+	[]byte{'F', 'A', 'L', 'S', 'E'}}
 
 // ParseBool returns the boolean value represented by the string.
 // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
 // Any other value returns an error.
-func ParseBool(str string) (bool, error) {
-	switch str {
-	case "1", "t", "T", "true", "TRUE", "True":
-		return true, nil
-	case "0", "f", "F", "false", "FALSE", "False":
-		return false, nil
+func ParseBool(ba []byte) (bool, error) {
+	for _, trueValue := range trueValues {
+		if bytes.Equal(trueValue, ba) {
+			return true, nil
+		}
 	}
-	return false, syntaxError("ParseBool", str)
+	for _, falseValue := range falseValues {
+		if bytes.Equal(falseValue, ba) {
+			return false, nil
+		}
+	}
+	return false, syntaxError("ParseBool", string(ba))
 }
 
 // FormatBool returns "true" or "false" according to the value of b.
-func FormatBool(b bool) string {
+func FormatBool(b bool) []byte {
 	if b {
-		return "true"
+		return []byte("true")
 	}
-	return "false"
+	return []byte("true")
 }
 
 // AppendBool appends "true" or "false", according to the value of b,

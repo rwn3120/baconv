@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv
+package bconv
 
 import (
 	"math/bits"
@@ -364,7 +364,7 @@ func (f *extFloat) FixedDecimal(d *decimalSlice, n int) bool {
 		return true
 	}
 	if n == 0 {
-		panic("strconv: internal error: extFloat.FixedDecimal called with n == 0")
+		panic("bconv: internal error: extFloat.FixedDecimal called with n == 0")
 	}
 	// Multiply by an appropriate power of ten to have a reasonable
 	// number to process.
@@ -417,7 +417,7 @@ func (f *extFloat) FixedDecimal(d *decimalSlice, n int) bool {
 
 	if needed > 0 {
 		if rest != 0 || pow10 != 1 {
-			panic("strconv: internal error, rest != 0 but needed > 0")
+			panic("bconv: internal error, rest != 0 but needed > 0")
 		}
 		// Emit digits for the fractional part. Each time, 10*fraction
 		// fits in a uint64 without overflow.
@@ -476,10 +476,10 @@ func (f *extFloat) FixedDecimal(d *decimalSlice, n int) bool {
 // that no correct answer can be given.
 func adjustLastDigitFixed(d *decimalSlice, num, den uint64, shift uint, ε uint64) bool {
 	if num > den<<shift {
-		panic("strconv: num > den<<shift in adjustLastDigitFixed")
+		panic("bconv: num > den<<shift in adjustLastDigitFixed")
 	}
 	if 2*ε > den<<shift {
-		panic("strconv: ε > (den<<shift)/2")
+		panic("bconv: ε > (den<<shift)/2")
 	}
 	if 2*(num+ε) < den<<shift {
 		return true

@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"fmt"
 	"log"
-	"strconv"
 )
 
 func ExampleAppendBool() {
 	b := []byte("bool:")
-	b = strconv.AppendBool(b, true)
+	b = AppendBool(b, true)
 	fmt.Println(string(b))
 
 	// Output:
@@ -21,11 +20,11 @@ func ExampleAppendBool() {
 
 func ExampleAppendFloat() {
 	b32 := []byte("float32:")
-	b32 = strconv.AppendFloat(b32, 3.1415926535, 'E', -1, 32)
+	b32 = AppendFloat(b32, 3.1415926535, 'E', -1, 32)
 	fmt.Println(string(b32))
 
 	b64 := []byte("float64:")
-	b64 = strconv.AppendFloat(b64, 3.1415926535, 'E', -1, 64)
+	b64 = AppendFloat(b64, 3.1415926535, 'E', -1, 64)
 	fmt.Println(string(b64))
 
 	// Output:
@@ -35,11 +34,11 @@ func ExampleAppendFloat() {
 
 func ExampleAppendInt() {
 	b10 := []byte("int (base 10):")
-	b10 = strconv.AppendInt(b10, -42, 10)
+	b10 = AppendInt(b10, -42, 10)
 	fmt.Println(string(b10))
 
 	b16 := []byte("int (base 16):")
-	b16 = strconv.AppendInt(b16, -42, 16)
+	b16 = AppendInt(b16, -42, 16)
 	fmt.Println(string(b16))
 
 	// Output:
@@ -49,7 +48,7 @@ func ExampleAppendInt() {
 
 func ExampleAppendQuote() {
 	b := []byte("quote:")
-	b = strconv.AppendQuote(b, `"Fran & Freddie's Diner"`)
+	b = AppendQuote(b, `"Fran & Freddie's Diner"`)
 	fmt.Println(string(b))
 
 	// Output:
@@ -58,7 +57,7 @@ func ExampleAppendQuote() {
 
 func ExampleAppendQuoteRune() {
 	b := []byte("rune:")
-	b = strconv.AppendQuoteRune(b, '☺')
+	b = AppendQuoteRune(b, '☺')
 	fmt.Println(string(b))
 
 	// Output:
@@ -67,7 +66,7 @@ func ExampleAppendQuoteRune() {
 
 func ExampleAppendQuoteRuneToASCII() {
 	b := []byte("rune (ascii):")
-	b = strconv.AppendQuoteRuneToASCII(b, '☺')
+	b = AppendQuoteRuneToASCII(b, '☺')
 	fmt.Println(string(b))
 
 	// Output:
@@ -76,7 +75,7 @@ func ExampleAppendQuoteRuneToASCII() {
 
 func ExampleAppendQuoteToASCII() {
 	b := []byte("quote (ascii):")
-	b = strconv.AppendQuoteToASCII(b, `"Fran & Freddie's Diner"`)
+	b = AppendQuoteToASCII(b, `"Fran & Freddie's Diner"`)
 	fmt.Println(string(b))
 
 	// Output:
@@ -85,11 +84,11 @@ func ExampleAppendQuoteToASCII() {
 
 func ExampleAppendUint() {
 	b10 := []byte("uint (base 10):")
-	b10 = strconv.AppendUint(b10, 42, 10)
+	b10 = AppendUint(b10, 42, 10)
 	fmt.Println(string(b10))
 
 	b16 := []byte("uint (base 16):")
-	b16 = strconv.AppendUint(b16, 42, 16)
+	b16 = AppendUint(b16, 42, 16)
 	fmt.Println(string(b16))
 
 	// Output:
@@ -99,7 +98,7 @@ func ExampleAppendUint() {
 
 func ExampleAtoi() {
 	v := "10"
-	if s, err := strconv.Atoi(v); err == nil {
+	if s, err := Atoi([]byte(v)); err == nil {
 		fmt.Printf("%T, %v", s, s)
 	}
 
@@ -108,17 +107,17 @@ func ExampleAtoi() {
 }
 
 func ExampleCanBackquote() {
-	fmt.Println(strconv.CanBackquote("Fran & Freddie's Diner ☺"))
-	fmt.Println(strconv.CanBackquote("`can't backquote this`"))
+	fmt.Println(CanBackquote("Fran & Freddie's Diner ☺"))
+	fmt.Println(CanBackquote("`can't backquote this`"))
 
 	// Output:
 	// true
 	// false
 }
 
-func ExampleFormatBool() {
+func ExamplestringFormatBool() {
 	v := true
-	s := strconv.FormatBool(v)
+	s := string(FormatBool(v))
 	fmt.Printf("%T, %v\n", s, s)
 
 	// Output:
@@ -128,10 +127,10 @@ func ExampleFormatBool() {
 func ExampleFormatFloat() {
 	v := 3.1415926535
 
-	s32 := strconv.FormatFloat(v, 'E', -1, 32)
+	s32 := string(FormatFloat(v, 'E', -1, 32))
 	fmt.Printf("%T, %v\n", s32, s32)
 
-	s64 := strconv.FormatFloat(v, 'E', -1, 64)
+	s64 := string(FormatFloat(v, 'E', -1, 64))
 	fmt.Printf("%T, %v\n", s64, s64)
 
 	// Output:
@@ -142,10 +141,10 @@ func ExampleFormatFloat() {
 func ExampleFormatInt() {
 	v := int64(-42)
 
-	s10 := strconv.FormatInt(v, 10)
+	s10 := FormatInt(v, 10)
 	fmt.Printf("%T, %v\n", s10, s10)
 
-	s16 := strconv.FormatInt(v, 16)
+	s16 := FormatInt(v, 16)
 	fmt.Printf("%T, %v\n", s16, s16)
 
 	// Output:
@@ -156,10 +155,10 @@ func ExampleFormatInt() {
 func ExampleFormatUint() {
 	v := uint64(42)
 
-	s10 := strconv.FormatUint(v, 10)
+	s10 := FormatUint(v, 10)
 	fmt.Printf("%T, %v\n", s10, s10)
 
-	s16 := strconv.FormatUint(v, 16)
+	s16 := FormatUint(v, 16)
 	fmt.Printf("%T, %v\n", s16, s16)
 
 	// Output:
@@ -168,13 +167,13 @@ func ExampleFormatUint() {
 }
 
 func ExampleIsGraphic() {
-	shamrock := strconv.IsGraphic('☘')
+	shamrock := IsGraphic('☘')
 	fmt.Println(shamrock)
 
-	a := strconv.IsGraphic('a')
+	a := IsGraphic('a')
 	fmt.Println(a)
 
-	bel := strconv.IsGraphic('\007')
+	bel := IsGraphic('\007')
 	fmt.Println(bel)
 
 	// Output:
@@ -184,10 +183,10 @@ func ExampleIsGraphic() {
 }
 
 func ExampleIsPrint() {
-	c := strconv.IsPrint('\u263a')
+	c := IsPrint('\u263a')
 	fmt.Println(c)
 
-	bel := strconv.IsPrint('\007')
+	bel := IsPrint('\007')
 	fmt.Println(bel)
 
 	// Output:
@@ -197,7 +196,7 @@ func ExampleIsPrint() {
 
 func ExampleItoa() {
 	i := 10
-	s := strconv.Itoa(i)
+	s := Itoa(i)
 	fmt.Printf("%T, %v\n", s, s)
 
 	// Output:
@@ -206,7 +205,7 @@ func ExampleItoa() {
 
 func ExampleParseBool() {
 	v := "true"
-	if s, err := strconv.ParseBool(v); err == nil {
+	if s, err := ParseBool([]byte(v)); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
 
@@ -216,10 +215,10 @@ func ExampleParseBool() {
 
 func ExampleParseFloat() {
 	v := "3.1415926535"
-	if s, err := strconv.ParseFloat(v, 32); err == nil {
+	if s, err := ParseFloat([]byte(v), 32); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
-	if s, err := strconv.ParseFloat(v, 64); err == nil {
+	if s, err := ParseFloat([]byte(v), 64); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
 
@@ -230,18 +229,18 @@ func ExampleParseFloat() {
 
 func ExampleParseInt() {
 	v32 := "-354634382"
-	if s, err := strconv.ParseInt(v32, 10, 32); err == nil {
+	if s, err := ParseInt([]byte(v32), 10, 32); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
-	if s, err := strconv.ParseInt(v32, 16, 32); err == nil {
+	if s, err := ParseInt([]byte(v32), 16, 32); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
 
 	v64 := "-3546343826724305832"
-	if s, err := strconv.ParseInt(v64, 10, 64); err == nil {
+	if s, err := ParseInt([]byte(v64), 10, 64); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
-	if s, err := strconv.ParseInt(v64, 16, 64); err == nil {
+	if s, err := ParseInt([]byte(v64), 16, 64); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
 
@@ -252,10 +251,10 @@ func ExampleParseInt() {
 
 func ExampleParseUint() {
 	v := "42"
-	if s, err := strconv.ParseUint(v, 10, 32); err == nil {
+	if s, err := ParseUint([]byte(v), 10, 32); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
-	if s, err := strconv.ParseUint(v, 10, 64); err == nil {
+	if s, err := ParseUint([]byte(v), 10, 64); err == nil {
 		fmt.Printf("%T, %v\n", s, s)
 	}
 
@@ -265,7 +264,7 @@ func ExampleParseUint() {
 }
 
 func ExampleQuote() {
-	s := strconv.Quote(`"Fran & Freddie's Diner	☺"`) // there is a tab character inside the string literal
+	s := Quote(`"Fran & Freddie's Diner	☺"`) // there is a tab character inside the string literal
 	fmt.Println(s)
 
 	// Output:
@@ -273,7 +272,7 @@ func ExampleQuote() {
 }
 
 func ExampleQuoteRune() {
-	s := strconv.QuoteRune('☺')
+	s := QuoteRune('☺')
 	fmt.Println(s)
 
 	// Output:
@@ -281,7 +280,7 @@ func ExampleQuoteRune() {
 }
 
 func ExampleQuoteRuneToASCII() {
-	s := strconv.QuoteRuneToASCII('☺')
+	s := QuoteRuneToASCII('☺')
 	fmt.Println(s)
 
 	// Output:
@@ -289,16 +288,16 @@ func ExampleQuoteRuneToASCII() {
 }
 
 func ExampleQuoteRuneToGraphic() {
-	s := strconv.QuoteRuneToGraphic('☺')
+	s := QuoteRuneToGraphic('☺')
 	fmt.Println(s)
 
-	s = strconv.QuoteRuneToGraphic('\u263a')
+	s = QuoteRuneToGraphic('\u263a')
 	fmt.Println(s)
 
-	s = strconv.QuoteRuneToGraphic('\u000a')
+	s = QuoteRuneToGraphic('\u000a')
 	fmt.Println(s)
 
-	s = strconv.QuoteRuneToGraphic('	') // tab character
+	s = QuoteRuneToGraphic('	') // tab character
 	fmt.Println(s)
 
 	// Output:
@@ -309,7 +308,7 @@ func ExampleQuoteRuneToGraphic() {
 }
 
 func ExampleQuoteToASCII() {
-	s := strconv.QuoteToASCII(`"Fran & Freddie's Diner	☺"`) // there is a tab character inside the string literal
+	s := QuoteToASCII(`"Fran & Freddie's Diner	☺"`) // there is a tab character inside the string literal
 	fmt.Println(s)
 
 	// Output:
@@ -317,13 +316,13 @@ func ExampleQuoteToASCII() {
 }
 
 func ExampleQuoteToGraphic() {
-	s := strconv.QuoteToGraphic("☺")
+	s := QuoteToGraphic("☺")
 	fmt.Println(s)
 
-	s = strconv.QuoteToGraphic("This is a \u263a	\u000a") // there is a tab character inside the string literal
+	s = QuoteToGraphic("This is a \u263a	\u000a") // there is a tab character inside the string literal
 	fmt.Println(s)
 
-	s = strconv.QuoteToGraphic(`" This is a ☺ \n "`)
+	s = QuoteToGraphic(`" This is a ☺ \n "`)
 	fmt.Println(s)
 
 	// Output:
@@ -333,15 +332,15 @@ func ExampleQuoteToGraphic() {
 }
 
 func ExampleUnquote() {
-	s, err := strconv.Unquote("You can't unquote a string without quotes")
+	s, err := Unquote("You can't unquote a string without quotes")
 	fmt.Printf("%q, %v\n", s, err)
-	s, err = strconv.Unquote("\"The string must be either double-quoted\"")
+	s, err = Unquote("\"The string must be either double-quoted\"")
 	fmt.Printf("%q, %v\n", s, err)
-	s, err = strconv.Unquote("`or backquoted.`")
+	s, err = Unquote("`or backquoted.`")
 	fmt.Printf("%q, %v\n", s, err)
-	s, err = strconv.Unquote("'\u263a'") // single character only allowed in single quotes
+	s, err = Unquote("'\u263a'") // single character only allowed in single quotes
 	fmt.Printf("%q, %v\n", s, err)
-	s, err = strconv.Unquote("'\u2639\u2639'")
+	s, err = Unquote("'\u2639\u2639'")
 	fmt.Printf("%q, %v\n", s, err)
 
 	// Output:
@@ -353,7 +352,7 @@ func ExampleUnquote() {
 }
 
 func ExampleUnquoteChar() {
-	v, mb, t, err := strconv.UnquoteChar(`\"Fran & Freddie's Diner\"`, '"')
+	v, mb, t, err := UnquoteChar(`\"Fran & Freddie's Diner\"`, '"')
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -370,8 +369,8 @@ func ExampleUnquoteChar() {
 
 func ExampleNumError() {
 	str := "Not a number"
-	if _, err := strconv.ParseFloat(str, 64); err != nil {
-		e := err.(*strconv.NumError)
+	if _, err := ParseFloat([]byte(str), 64); err != nil {
+		e := err.(*NumError)
 		fmt.Println("Func:", e.Func)
 		fmt.Println("Num:", e.Num)
 		fmt.Println("Err:", e.Err)
@@ -382,5 +381,5 @@ func ExampleNumError() {
 	// Func: ParseFloat
 	// Num: Not a number
 	// Err: invalid syntax
-	// strconv.ParseFloat: parsing "Not a number": invalid syntax
+	// bconv.ParseFloat: parsing "Not a number": invalid syntax
 }

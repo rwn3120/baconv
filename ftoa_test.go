@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"math"
 	"math/rand"
-	. "strconv"
 	"testing"
 )
 
@@ -133,7 +132,7 @@ var ftoatests = []ftoaTest{
 func TestFtoa(t *testing.T) {
 	for i := 0; i < len(ftoatests); i++ {
 		test := &ftoatests[i]
-		s := FormatFloat(test.f, test.fmt, test.prec, 64)
+		s := string(FormatFloat(test.f, test.fmt, test.prec, 64))
 		if s != test.s {
 			t.Error("testN=64", test.f, string(test.fmt), test.prec, "want", test.s, "got", s)
 		}
@@ -142,7 +141,7 @@ func TestFtoa(t *testing.T) {
 			t.Error("AppendFloat testN=64", test.f, string(test.fmt), test.prec, "want", "abc"+test.s, "got", string(x))
 		}
 		if float64(float32(test.f)) == test.f && test.fmt != 'b' {
-			s := FormatFloat(test.f, test.fmt, test.prec, 32)
+			s := string(FormatFloat(test.f, test.fmt, test.prec, 32))
 			if s != test.s {
 				t.Error("testN=32", test.f, string(test.fmt), test.prec, "want", test.s, "got", s)
 			}
@@ -159,23 +158,23 @@ func TestFtoaRandom(t *testing.T) {
 	if testing.Short() {
 		N = 100
 	}
-	t.Logf("testing %d random numbers with fast and slow FormatFloat", N)
+	t.Logf("testing %d random numbers with fast and slow string(FormatFloat", N)
 	for i := 0; i < N; i++ {
 		bits := uint64(rand.Uint32())<<32 | uint64(rand.Uint32())
 		x := math.Float64frombits(bits)
 
-		shortFast := FormatFloat(x, 'g', -1, 64)
+		shortFast := string(FormatFloat(x, 'g', -1, 64))
 		SetOptimize(false)
-		shortSlow := FormatFloat(x, 'g', -1, 64)
+		shortSlow := string(FormatFloat(x, 'g', -1, 64))
 		SetOptimize(true)
 		if shortSlow != shortFast {
 			t.Errorf("%b printed as %s, want %s", x, shortFast, shortSlow)
 		}
 
 		prec := rand.Intn(12) + 5
-		shortFast = FormatFloat(x, 'e', prec, 64)
+		shortFast = string(FormatFloat(x, 'e', prec, 64))
 		SetOptimize(false)
-		shortSlow = FormatFloat(x, 'e', prec, 64)
+		shortSlow = string(FormatFloat(x, 'e', prec, 64))
 		SetOptimize(true)
 		if shortSlow != shortFast {
 			t.Errorf("%b printed as %s, want %s", x, shortFast, shortSlow)

@@ -8,7 +8,7 @@
 //   2) shift decimal by exponent
 //   3) read digits out & format
 
-package strconv
+package bconv
 
 import "math"
 
@@ -42,8 +42,8 @@ var float64info = floatInfo{52, 11, -1023}
 // zeros are removed).
 // The special precision -1 uses the smallest number of digits
 // necessary such that ParseFloat will return f exactly.
-func FormatFloat(f float64, fmt byte, prec, bitSize int) string {
-	return string(genericFtoa(make([]byte, 0, max(prec+4, 24)), f, fmt, prec, bitSize))
+func FormatFloat(f float64, fmt byte, prec, bitSize int) []byte {
+	return genericFtoa(make([]byte, 0, max(prec+4, 24)), f, fmt, prec, bitSize)
 }
 
 // AppendFloat appends the string form of the floating-point number f,
@@ -63,7 +63,7 @@ func genericFtoa(dst []byte, val float64, fmt byte, prec, bitSize int) []byte {
 		bits = math.Float64bits(val)
 		flt = &float64info
 	default:
-		panic("strconv: illegal AppendFloat/FormatFloat bitSize")
+		panic("bconv: illegal AppendFloat/FormatFloat bitSize")
 	}
 
 	neg := bits>>(flt.expbits+flt.mantbits) != 0

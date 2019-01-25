@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -25,16 +24,16 @@ func pow2(i int) float64 {
 	return pow2(i/2) * pow2(i-i/2)
 }
 
-// Wrapper around strconv.ParseFloat(x, 64).  Handles dddddp+ddd (binary exponent)
-// itself, passes the rest on to strconv.ParseFloat.
+// Wrapper around ParseFloat(x, 64).  Handles dddddp+ddd (binary exponent)
+// itself, passes the rest on to ParseFloat.
 func myatof64(s string) (f float64, ok bool) {
 	a := strings.SplitN(s, "p", 2)
 	if len(a) == 2 {
-		n, err := strconv.ParseInt(a[0], 10, 64)
+		n, err := ParseInt([]byte(a[0]), 10, 64)
 		if err != nil {
 			return 0, false
 		}
-		e, err1 := strconv.Atoi(a[1])
+		e, err1 := Atoi([]byte(a[1]))
 		if err1 != nil {
 			println("bad e", a[1])
 			return 0, false
@@ -62,31 +61,31 @@ func myatof64(s string) (f float64, ok bool) {
 		}
 		return v * pow2(e), true
 	}
-	f1, err := strconv.ParseFloat(s, 64)
+	f1, err := ParseFloat([]byte(s), 64)
 	if err != nil {
 		return 0, false
 	}
 	return f1, true
 }
 
-// Wrapper around strconv.ParseFloat(x, 32).  Handles dddddp+ddd (binary exponent)
-// itself, passes the rest on to strconv.ParseFloat.
+// Wrapper around ParseFloat(x, 32).  Handles dddddp+ddd (binary exponent)
+// itself, passes the rest on to ParseFloat.
 func myatof32(s string) (f float32, ok bool) {
 	a := strings.SplitN(s, "p", 2)
 	if len(a) == 2 {
-		n, err := strconv.Atoi(a[0])
+		n, err := Atoi([]byte(a[0]))
 		if err != nil {
 			println("bad n", a[0])
 			return 0, false
 		}
-		e, err1 := strconv.Atoi(a[1])
+		e, err1 := Atoi([]byte(a[1]))
 		if err1 != nil {
 			println("bad p", a[1])
 			return 0, false
 		}
 		return float32(float64(n) * pow2(e)), true
 	}
-	f64, err1 := strconv.ParseFloat(s, 32)
+	f64, err1 := ParseFloat([]byte(s), 32)
 	f1 := float32(f64)
 	if err1 != nil {
 		return 0, false

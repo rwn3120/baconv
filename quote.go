@@ -4,7 +4,7 @@
 
 //go:generate go run makeisprint.go -output isprint.go
 
-package strconv
+package bconv
 
 import (
 	"unicode/utf8"
@@ -426,14 +426,13 @@ func Unquote(s string) (string, error) {
 
 // contains reports whether the string contains the byte c.
 func contains(s string, c byte) bool {
-        r := rune(c)
-        for _, sr := range s {
-            if sr == r {
-                return true
-            }
-        }
-        return false
-//	return bytealg.IndexByteString(s, c) != -1
+	for i := 0; i < len(s); i++ {
+		if s[i] == c {
+			return true
+		}
+	}
+	return false
+	//	return bytealg.IndexByteString(s, c) != -1
 }
 
 // bsearch16 returns the smallest i such that a[i] >= x.

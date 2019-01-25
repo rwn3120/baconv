@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"math"
 	"math/rand"
 	"reflect"
-	. "strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -250,19 +249,19 @@ func initAtofOnce() {
 	for i := range atofRandomTests {
 		n := uint64(rand.Uint32())<<32 | uint64(rand.Uint32())
 		x := math.Float64frombits(n)
-		s := FormatFloat(x, 'g', -1, 64)
+		s := string(FormatFloat(x, 'g', -1, 64))
 		atofRandomTests[i] = atofSimpleTest{x, s}
 	}
 
 	for i := range benchmarksRandomBits {
 		bits := uint64(rand.Uint32())<<32 | uint64(rand.Uint32())
 		x := math.Float64frombits(bits)
-		benchmarksRandomBits[i] = FormatFloat(x, 'g', -1, 64)
+		benchmarksRandomBits[i] = string(FormatFloat(x, 'g', -1, 64))
 	}
 
 	for i := range benchmarksRandomNormal {
 		x := rand.NormFloat64()
-		benchmarksRandomNormal[i] = FormatFloat(x, 'g', -1, 64)
+		benchmarksRandomNormal[i] = string(FormatFloat(x, 'g', -1, 64))
 	}
 }
 
@@ -271,21 +270,21 @@ func testAtof(t *testing.T, opt bool) {
 	oldopt := SetOptimize(opt)
 	for i := 0; i < len(atoftests); i++ {
 		test := &atoftests[i]
-		out, err := ParseFloat(test.in, 64)
-		outs := FormatFloat(out, 'g', -1, 64)
+		out, err := ParseFloat([]byte(test.in), 64)
+		outs := string(FormatFloat(out, 'g', -1, 64))
 		if outs != test.out || !reflect.DeepEqual(err, test.err) {
 			t.Errorf("ParseFloat(%v, 64) = %v, %v want %v, %v",
 				test.in, out, err, test.out, test.err)
 		}
 
 		if float64(float32(out)) == out {
-			out, err := ParseFloat(test.in, 32)
+			out, err := ParseFloat([]byte(test.in), 32)
 			out32 := float32(out)
 			if float64(out32) != out {
 				t.Errorf("ParseFloat(%v, 32) = %v, not a float32 (closest is %v)", test.in, out, float64(out32))
 				continue
 			}
-			outs := FormatFloat(float64(out32), 'g', -1, 32)
+			outs := string(FormatFloat(float64(out32), 'g', -1, 32))
 			if outs != test.out || !reflect.DeepEqual(err, test.err) {
 				t.Errorf("ParseFloat(%v, 32) = %v, %v want %v, %v  # %v",
 					test.in, out32, err, test.out, test.err, out)
@@ -293,13 +292,13 @@ func testAtof(t *testing.T, opt bool) {
 		}
 	}
 	for _, test := range atof32tests {
-		out, err := ParseFloat(test.in, 32)
+		out, err := ParseFloat([]byte(test.in), 32)
 		out32 := float32(out)
 		if float64(out32) != out {
 			t.Errorf("ParseFloat(%v, 32) = %v, not a float32 (closest is %v)", test.in, out, float64(out32))
 			continue
 		}
-		outs := FormatFloat(float64(out32), 'g', -1, 32)
+		outs := string(FormatFloat(float64(out32), 'g', -1, 32))
 		if outs != test.out || !reflect.DeepEqual(err, test.err) {
 			t.Errorf("ParseFloat(%v, 32) = %v, %v want %v, %v  # %v",
 				test.in, out32, err, test.out, test.err, out)
@@ -315,7 +314,7 @@ func TestAtofSlow(t *testing.T) { testAtof(t, false) }
 func TestAtofRandom(t *testing.T) {
 	initAtof()
 	for _, test := range atofRandomTests {
-		x, _ := ParseFloat(test.s, 64)
+		x, _ := ParseFloat([]byte(test.s), 64)
 		switch {
 		default:
 			t.Errorf("number %s badly parsed as %b (expected %b)", test.s, x, test.x)
@@ -343,20 +342,20 @@ var roundTripCases = []struct {
 func TestRoundTrip(t *testing.T) {
 	for _, tt := range roundTripCases {
 		old := SetOptimize(false)
-		s := FormatFloat(tt.f, 'g', -1, 64)
+		s := string(FormatFloat(tt.f, 'g', -1, 64))
 		if s != tt.s {
-			t.Errorf("no-opt FormatFloat(%b) = %s, want %s", tt.f, s, tt.s)
+			t.Errorf("no-opt string(FormatFloat(%b) = %s, want %s", tt.f, s, tt.s)
 		}
-		f, err := ParseFloat(tt.s, 64)
+		f, err := ParseFloat([]byte(tt.s), 64)
 		if f != tt.f || err != nil {
 			t.Errorf("no-opt ParseFloat(%s) = %b, %v want %b, nil", tt.s, f, err, tt.f)
 		}
 		SetOptimize(true)
-		s = FormatFloat(tt.f, 'g', -1, 64)
+		s = string(FormatFloat(tt.f, 'g', -1, 64))
 		if s != tt.s {
-			t.Errorf("opt FormatFloat(%b) = %s, want %s", tt.f, s, tt.s)
+			t.Errorf("opt string(FormatFloat(%b) = %s, want %s", tt.f, s, tt.s)
 		}
-		f, err = ParseFloat(tt.s, 64)
+		f, err = ParseFloat([]byte(tt.s), 64)
 		if f != tt.f || err != nil {
 			t.Errorf("opt ParseFloat(%s) = %b, %v want %b, nil", tt.s, f, err, tt.f)
 		}
@@ -376,9 +375,9 @@ func TestRoundTrip32(t *testing.T) {
 		if i&1 == 1 {
 			f = -f // negative
 		}
-		s := FormatFloat(float64(f), 'g', -1, 32)
+		s := string(FormatFloat(float64(f), 'g', -1, 32))
 
-		parsed, err := ParseFloat(s, 32)
+		parsed, err := ParseFloat([]byte(s), 32)
 		parsed32 := float32(parsed)
 		switch {
 		case err != nil:
@@ -395,55 +394,55 @@ func TestRoundTrip32(t *testing.T) {
 
 func BenchmarkAtof64Decimal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("33909", 64)
+		ParseFloat([]byte("33909"), 64)
 	}
 }
 
 func BenchmarkAtof64Float(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("339.7784", 64)
+		ParseFloat([]byte("339.7784"), 64)
 	}
 }
 
 func BenchmarkAtof64FloatExp(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("-5.09e75", 64)
+		ParseFloat([]byte("-5.09e75"), 64)
 	}
 }
 
 func BenchmarkAtof64Big(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("123456789123456789123456789", 64)
+		ParseFloat([]byte("123456789123456789123456789"), 64)
 	}
 }
 
 func BenchmarkAtof64RandomBits(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat(benchmarksRandomBits[i%1024], 64)
+		ParseFloat([]byte(benchmarksRandomBits[i%1024]), 64)
 	}
 }
 
 func BenchmarkAtof64RandomFloats(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat(benchmarksRandomNormal[i%1024], 64)
+		ParseFloat([]byte(benchmarksRandomNormal[i%1024]), 64)
 	}
 }
 
 func BenchmarkAtof32Decimal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("33909", 32)
+		ParseFloat([]byte("33909"), 32)
 	}
 }
 
 func BenchmarkAtof32Float(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("339.778", 32)
+		ParseFloat([]byte("339.778"), 32)
 	}
 }
 
 func BenchmarkAtof32FloatExp(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseFloat("12.3456e32", 32)
+		ParseFloat([]byte("12.3456e32"), 32)
 	}
 }
 
@@ -453,10 +452,10 @@ func BenchmarkAtof32Random(b *testing.B) {
 	n := uint32(997)
 	for i := range float32strings {
 		n = (99991*n + 42) % (0xff << 23)
-		float32strings[i] = FormatFloat(float64(math.Float32frombits(n)), 'g', -1, 32)
+		float32strings[i] = string(FormatFloat(float64(math.Float32frombits(n)), 'g', -1, 32))
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ParseFloat(float32strings[i%4096], 32)
+		ParseFloat([]byte(float32strings[i%4096]), 32)
 	}
 }

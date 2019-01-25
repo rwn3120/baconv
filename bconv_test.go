@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strconv_test
+package bconv
 
 import (
 	"runtime"
-	. "strconv"
 	"strings"
 	"testing"
 )
@@ -30,13 +29,13 @@ var (
 			AppendFloat(localBuf[:0], 1.23, 'g', 5, 64)
 		}},
 		{0, `AppendFloat(globalBuf[:0], 1.23, 'g', 5, 64)`, func() { AppendFloat(globalBuf[:0], 1.23, 'g', 5, 64) }},
-		{0, `ParseFloat("123.45", 64)`, func() { ParseFloat("123.45", 64) }},
-		{0, `ParseFloat("123.456789123456789", 64)`, func() { ParseFloat("123.456789123456789", 64) }},
+		{0, `ParseFloat("123.45", 64)`, func() { ParseFloat([]byte("123.45"), 64) }},
+		{0, `ParseFloat("123.456789123456789", 64)`, func() { ParseFloat([]byte("123.456789123456789"), 64) }},
 		{0, `ParseFloat("1.000000000000000111022302462515654042363166809082031251", 64)`, func() {
-			ParseFloat("1.000000000000000111022302462515654042363166809082031251", 64)
+			ParseFloat([]byte("1.000000000000000111022302462515654042363166809082031251"), 64)
 		}},
 		{0, `ParseFloat("1.0000000000000001110223024625156540423631668090820312500...001", 64)`, func() {
-			ParseFloat(nextToOne, 64)
+			ParseFloat([]byte(nextToOne), 64)
 		}},
 	}
 )
@@ -57,11 +56,11 @@ func TestCountMallocs(t *testing.T) {
 }
 
 func TestErrorPrefixes(t *testing.T) {
-	_, errInt := Atoi("INVALID")
-	_, errBool := ParseBool("INVALID")
-	_, errFloat := ParseFloat("INVALID", 64)
-	_, errInt64 := ParseInt("INVALID", 10, 64)
-	_, errUint64 := ParseUint("INVALID", 10, 64)
+	_, errInt := Atoi([]byte("INVALID"))
+	_, errBool := ParseBool([]byte("INVALID"))
+	_, errFloat := ParseFloat([]byte("INVALID"), 64)
+	_, errInt64 := ParseInt([]byte("INVALID"), 10, 64)
+	_, errUint64 := ParseUint([]byte("INVALID"), 10, 64)
 
 	vectors := []struct {
 		err  error  // Input error

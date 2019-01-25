@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// export access to strconv internals for tests
+// export access to bconv internals for tests
 
-package strconv
+package bconv
 
 func NewDecimal(i uint64) *decimal {
 	d := new(decimal)
