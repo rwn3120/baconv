@@ -448,7 +448,7 @@ func special(ba []byte) (f float64, ok bool) {
 	return
 }
 
-func batof32(ba []byte) (f float32, err error) {
+func Batof32(ba []byte) (f float32, err error) {
 	if val, ok := special(ba); ok {
 		return float32(val), nil
 	}
@@ -487,7 +487,7 @@ func batof32(ba []byte) (f float32, err error) {
 	return f, err
 }
 
-func batof64(ba []byte) (f float64, err error) {
+func Batof64(ba []byte) (f float64, err error) {
 	if val, ok := special(ba); ok {
 		return val, nil
 	}
@@ -545,8 +545,8 @@ func batof64(ba []byte) (f float64, err error) {
 // ParseFloat returns f = ±Inf, err.Err = ErrRange.
 func ParseFloat(ba []byte, bitSize int) (float64, error) {
 	if bitSize == 32 {
-		f, err := batof32(ba)
+		f, err := Batof32(ba)
 		return float64(f), err
 	}
-	return batof64(ba)
+	return Batof64(ba)
 }
